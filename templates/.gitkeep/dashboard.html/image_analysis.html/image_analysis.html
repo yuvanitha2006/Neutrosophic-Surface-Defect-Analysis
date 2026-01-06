@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image-wise Analysis</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Dark mode global files -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head>
+
+<body>
+
+<!-- Dark mode toggle -->
+<div class="text-end p-3">
+    <button onclick="toggleTheme()" class="btn btn-outline-secondary">
+        🌙 Toggle Dark Mode
+    </button>
+</div>
+
+<div class="container mt-4">
+
+    <h2 class="text-center text-primary mb-4">
+        Image-wise Neutrosophic Surface Defect Analysis
+    </h2>
+
+    <!-- Selection Card -->
+    <div class="card shadow p-4 mb-4">
+        <form method="post">
+            <label class="form-label fw-bold">Select Image</label>
+            <select name="image" class="form-select">
+                {% for img in images %}
+                <option value="{{ img }}" {% if img == selected %}selected{% endif %}>
+                    {{ img }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <button class="btn btn-primary mt-3 w-100">
+                Analyze Image
+            </button>
+        </form>
+    </div>
+
+    {% if result %}
+    <!-- Result Card -->
+    <div class="card shadow p-4">
+
+        <h4 class="text-center mb-4">Analysis Result</h4>
+
+        <div class="row">
+
+            <!-- Original & Preprocessed Images -->
+            <div class="col-md-4 text-center">
+                <h6>Original Image</h6>
+                <img src="{{ image_path }}" class="img-thumbnail mb-3" width="220">
+<h6 class="text-center mt-3">Preprocessed Image</h6>
+
+{% if processed_path %}
+    <img src="{{ processed_path }}" class="img-thumbnail" width="250">
+{% else %}
+    <p class="text-danger text-center">
+        Preprocessed image not available
+    </p>
+{% endif %}
+
+
+                            </div>
+
+            <!-- Neutrosophic Values -->
+            <div class="col-md-4">
+                <p><b>Truth:</b> {{ result.Truth }}%</p>
+                <p><b>Indeterminacy:</b> {{ result.Indeterminacy }}%</p>
+                <p><b>Falsity:</b> {{ result.Falsity }}%</p>
+
+                <p><b>Status:</b>
+                    {% if result.Label == 'defect' %}
+                        <span class="badge bg-danger">Defect Detected</span>
+                    {% else %}
+                        <span class="badge bg-success">Normal Surface</span>
+                    {% endif %}
+                </p>
+
+                <p><b>Confidence Level:</b>
+                    {% if result.Confidence == 'High' %}
+                        <span class="badge bg-success">High</span>
+                    {% elif result.Confidence == 'Medium' %}
+                        <span class="badge bg-warning text-dark">Medium</span>
+                    {% else %}
+                        <span class="badge bg-danger">Low</span>
+                    {% endif %}
+                </p>
+
+                <p><b>Severity Level:</b>
+                    {% if result.Severity == 'Severe' %}
+                        <span class="badge bg-danger">Severe</span>
+                    {% elif result.Severity == 'Moderate' %}
+                        <span class="badge bg-warning text-dark">Moderate</span>
+                    {% else %}
+                        <span class="badge bg-success">Minor</span>
+                    {% endif %}
+                </p>
+
+                <!-- Explanation -->
+                <div class="alert alert-info mt-3">
+    <b>Explanation:</b><br>
+    {{ explanation }}
+</div>
+
+                <!-- PDF -->
+                <a href="/download_report/{{ selected }}" class="btn btn-outline-primary w-100 mt-2">
+                    Download PDF Report
+                </a>
+            </div>
+
+            <!-- Chart -->
+            <div class="col-md-4">
+                <canvas id="tifChart"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Chart Script -->
+    <script>
+        const ctx = document.getElementById('tifChart');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Truth', 'Indeterminacy', 'Falsity'],
+                datasets: [{
+                    label: 'Neutrosophic Values (%)',
+                    data: [
+                        {{ result.Truth }},
+                        {{ result.Indeterminacy }},
+                        {{ result.Falsity }}
+                    ]
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
