@@ -1,6 +1,5 @@
 # Neutrosophic-Surface-Defect-Analysis
 Surface defect detection using Neutrosophic Logic
-# Neutrosophic Surface Defect Analysis
 
 A Flask-based application for detecting industrial surface defects using Neutrosophic Logic.
 
